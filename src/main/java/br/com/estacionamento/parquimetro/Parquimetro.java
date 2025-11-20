@@ -81,11 +81,11 @@ public class Parquimetro {
 
     // Pequena interface de console para demonstração
     public static void main(String[] args) {
-        GerenciadorMoedas gm = new GerenciadorMoedas();
-        // inicializa com algumas moedas para permitir troco
-        gm.adicionarMoedas(ValorMoeda.CENT50, 10);
-        gm.adicionarMoedas(ValorMoeda.ONE, 5);
-        gm.adicionarMoedas(ValorMoeda.TWO, 2);
+    GerenciadorMoedas gm = new GerenciadorMoedas();
+    // inicializa conforme requisito: 3 moedas de 0,50; 1 moeda de 1 real; 0 moedas de 2 reais
+    gm.adicionarMoedas(ValorMoeda.CENT50, 3);
+    gm.adicionarMoedas(ValorMoeda.ONE, 1);
+    // ValorMoeda.TWO já começa com zero
 
         Parquimetro p = new Parquimetro(gm);
         Scanner sc = new Scanner(System.in);
@@ -93,17 +93,34 @@ public class Parquimetro {
         System.out.println("Bem-vindo ao parquímetro\n");
         System.out.print("Digite a placa do veículo: ");
         String placa = sc.nextLine().trim();
+        // Validação simples: placa no formato ABC-1234 ou ABC1D23 (padrão Mercosul)
+        if (!placa.matches("^[A-Z]{3}-?\d{1}[A-Z0-9]{1}\d{2}$") && !placa.matches("^[A-Z]{3}-?\d{4}$")) {
+            System.out.println("Placa inválida. Encerrando.");
+            sc.close();
+            return;
+        }
 
-        System.out.println("Selecione o tempo de permanência:");
-        System.out.println("1 - 30 minutos\n2 - 1 hora\n3 - 2 horas");
-        System.out.print("Opção: ");
-        int opc = Integer.parseInt(sc.nextLine());
-        TempoPermanencia tempo = switch (opc) {
-            case 1 -> TempoPermanencia.MIN30;
-            case 2 -> TempoPermanencia.HORA1;
-            case 3 -> TempoPermanencia.HORA2;
-            default -> TempoPermanencia.MIN30;
-        };
+        System.out.println("Informe o tempo de permanência desejado (em minutos):");
+        String tempoStr = sc.nextLine().trim();
+        int tempoMin;
+        try {
+            tempoMin = Integer.parseInt(tempoStr);
+        } catch (NumberFormatException e) {
+            System.out.println("Tempo inválido. Encerrando.");
+            sc.close();
+            return;
+        }
+        // Arredondamento para cima conforme especificação
+        TempoPermanencia tempo;
+        if (tempoMin <= 30) {
+            tempo = TempoPermanencia.MIN30;
+        } else if (tempoMin <= 60) {
+            tempo = TempoPermanencia.HORA1;
+        } else if (tempoMin <= 120) {
+            tempo = TempoPermanencia.HORA2;
+        } else {
+            tempo = TempoPermanencia.HORA2;
+        }
 
         System.out.printf("Valor a pagar: R$ %.2f (aceita R$0,50; R$1; R$2)\n", tempo.getPrecoCentavos() / 100.0);
 
