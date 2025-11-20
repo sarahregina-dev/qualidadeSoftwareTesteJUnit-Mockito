@@ -11,6 +11,15 @@ import java.util.Scanner;
  * verificação de troco e geração de ticket.
  */
 public class Parquimetro {
+    /**
+     * Valida placa Mercosul: formato LLLNLNN (7 caracteres, 3 letras, 1 número, 1 letra, 2 números)
+     */
+    public static boolean validarPlacaMercosul(String placa) {
+        if (placa == null || placa.length() != 7) {
+            return false;
+        }
+        return placa.matches("^[A-Z]{3}[0-9][A-Z][0-9]{2}$");
+    }
     private final GerenciadorMoedas gerenciador;
 
     public Parquimetro(GerenciadorMoedas gerenciador) {
@@ -81,21 +90,20 @@ public class Parquimetro {
 
     // Pequena interface de console para demonstração
     public static void main(String[] args) {
-    GerenciadorMoedas gm = new GerenciadorMoedas();
-    // inicializa conforme requisito: 3 moedas de 0,50; 1 moeda de 1 real; 0 moedas de 2 reais
-    gm.adicionarMoedas(ValorMoeda.CENT50, 3);
-    gm.adicionarMoedas(ValorMoeda.ONE, 1);
-    // ValorMoeda.TWO já começa com zero
+        GerenciadorMoedas gm = new GerenciadorMoedas();
+        // inicializa com algumas moedas para permitir troco
+        gm.adicionarMoedas(ValorMoeda.CENT50, 10);
+        gm.adicionarMoedas(ValorMoeda.ONE, 5);
+        gm.adicionarMoedas(ValorMoeda.TWO, 2);
 
         Parquimetro p = new Parquimetro(gm);
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Bem-vindo ao parquímetro\n");
-        System.out.print("Digite a placa do veículo: ");
-        String placa = sc.nextLine().trim();
-        // Validação simples: placa no formato ABC-1234 ou ABC1D23 (padrão Mercosul)
-        if (!placa.matches("^[A-Z]{3}-?\d{1}[A-Z0-9]{1}\d{2}$") && !placa.matches("^[A-Z]{3}-?\d{4}$")) {
-            System.out.println("Placa inválida. Encerrando.");
+        System.out.print("Digite a placa do veículo (Mercosul, ex: ABC1D23): ");
+        String placa = sc.nextLine().trim().toUpperCase();
+        if (!validarPlacaMercosul(placa)) {
+            System.out.println("Placa inválida! Use o padrão Mercosul: LLLNLNN (ex: ABC1D23). Encerrando.");
             sc.close();
             return;
         }
